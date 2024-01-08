@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Contacts_screen from './components/Contacts_screen';
 import Recents from './components/Recents';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import Recents_screen from './components/Recents_screen';
 //import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 //import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,7 +16,7 @@ export default function App() {
     <>
     <NavigationContainer>
       <Tab.Navigator initialRouteName='Recents'>
-      <Tab.Screen name="Recents" component={Recents} options={{tabBarIcon:()=>(<Icon name="clock" size={20}/>)}}/>
+      <Tab.Screen name="recents_screen" component={Recents_screen} options={{tabBarIcon:()=>(<Icon name="clock" size={20}/>),headerShown:false}}/>
       <Tab.Screen name="contacts_screen" component={Contacts_screen} options={{headerShown:false,
       tabBarIcon: () => (
             <Icon name="users" size={20}/>

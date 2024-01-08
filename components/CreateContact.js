@@ -10,16 +10,10 @@ import {
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FlashMessage, { showMessage } from "react-native-flash-message";
-//import { GenerateUUID } from "react-native-uuid";
-//import UUIDGenerator from 'react-native-uuid-generator';
 import uuid from "react-native-uuid";
 import Icon from "react-native-ionicons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faPhone,
-  faTrash,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPhone, faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
 import CallComponent from "./CallComponent";
 
 const FORM_FIELDS = {
@@ -28,7 +22,7 @@ const FORM_FIELDS = {
   phone: "phone",
 };
 
-export default function Create_contact({ route, navigation }) {
+export default function CreateContact({ route, navigation }) {
   const [newContact, setNewContact] = useState({
     firstname: "",
     lastname: "",
@@ -37,11 +31,23 @@ export default function Create_contact({ route, navigation }) {
   });
   const [error, setError] = useState({});
   //const [list, setList] = useState([]);
-  const { name = "", phone = "", uri = "", id = " " } = route?.params ?? {};
+  const {
+    name = "",
+    phone = "",
+    uri = "",
+    id = " ",
+    recent_call = "",
+    count = 0,
+  } = route?.params ?? {};
   const { isCreateUserInfo = false } = route?.params;
   const { isEditUserInfo = false } = route?.params;
   console.log("route=====", route);
   console.log("parameters from contact screen", name, phone, uri, id);
+  const { tabScreenProp } = route?.params;
+  console.log(
+    "tabScreenProp---------------------------------------------------->",
+    tabScreenProp
+  );
 
   //splitting firstname and lastname
   const nameArray = name.split(" ");
@@ -116,7 +122,11 @@ export default function Create_contact({ route, navigation }) {
         message: "contact was deleted successfully",
         type: "info",
       });
-      navigation.navigate("contacts");
+      if (tabScreenProp === "contact") {
+        navigation.navigate("contacts");
+      } else {
+        navigation.navigate("Recents");
+      }
     } catch (error) {
       console.log("can't delete the user", error);
     }
@@ -149,6 +159,9 @@ export default function Create_contact({ route, navigation }) {
         console.log("id=", id);
         if (user.id === id) {
           console.log("user is ************", user);
+          if (!newContact.lastname) {
+            newContact.lastname = " ";
+          }
           (user.name = newContact.firstname + " " + newContact.lastname),
             (user.phone = newContact.phone),
             (user.uri = newContact.uri);
@@ -161,7 +174,11 @@ export default function Create_contact({ route, navigation }) {
         message: "contact was updated successfully",
         type: "info",
       });
-      navigation.navigate("contacts");
+      if (tabScreenProp === "contact") {
+        navigation.navigate("contacts");
+      } else {
+        navigation.navigate("Recents");
+      }
     } catch (error) {
       console.log("can't update the user", error);
     }
@@ -214,7 +231,10 @@ export default function Create_contact({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.nameContainer}>
-        <FontAwesomeIcon icon={faUser} style={{paddingTop:Platform.OS==="android"?30:0}}></FontAwesomeIcon>
+        <FontAwesomeIcon
+          icon={faUser}
+          style={{ paddingTop: Platform.OS === "android" ? 30 : 0 }}
+        ></FontAwesomeIcon>
         <View style={styles.nameTextContainer}>
           <TextInput
             placeholder="First Name"
@@ -235,33 +255,48 @@ export default function Create_contact({ route, navigation }) {
         </View>
       </View>
       <View style={styles.phoneContainer}>
-        <FontAwesomeIcon icon={faPhone} style={{paddingTop: Platform.OS === 'android' ? 30 : 0}}></FontAwesomeIcon>
+        <FontAwesomeIcon
+          icon={faPhone}
+          style={{ paddingTop: Platform.OS === "android" ? 30 : 0 }}
+        ></FontAwesomeIcon>
         <View style={styles.phoneTextContainer}>
-        <TextInput
-          placeholder="Phone"
-          keyboardType="numeric"
-          value={newContact.phone}
-          onChangeText={(text) => {
-            handleForm(FORM_FIELDS.phone, text);
-          }}
-        ></TextInput>
-        {error.phone ? <TextInput>{error.phone}</TextInput> : ""}
+          <TextInput
+            placeholder="Phone"
+            keyboardType="numeric"
+            value={newContact.phone}
+            onChangeText={(text) => {
+              handleForm(FORM_FIELDS.phone, text);
+            }}
+          ></TextInput>
+          {error.phone ? <TextInput>{error.phone}</TextInput> : ""}
         </View>
       </View>
-      <Button
-        title={isEditUserInfo ? "Update_contact" : "Create_contact"}
-        onPress={handleSubmit} buttonStyle={{backgroundColor:"blue"}}
-        color={"grey"}
-      ></Button>
-      {isEditUserInfo?<View>
-      <TouchableOpacity onPress={handleDeleteContact} style={{ margin: 30 }}>
-        <FontAwesomeIcon
-          icon={faTrash}
-          onPress={handleDeleteContact}
-        ></FontAwesomeIcon>
-      </TouchableOpacity>
-      <CallComponent navigation={navigation} route={route} />
-      </View>:<Text></Text>}
+      <TouchableOpacity onPress={handleSubmit} style={styles.buttonComponent}><Text style={{color:"white",textAlign:"center"}}>{isEditUserInfo ? "UpdateContact" : "CreateContact"}</Text></TouchableOpacity>
+      {isEditUserInfo ? (
+        <View>
+          <TouchableOpacity
+            onPress={handleDeleteContact}
+            style={{ margin: 30 }}
+          >
+            <FontAwesomeIcon
+              icon={faTrash}
+              onPress={handleDeleteContact}
+            ></FontAwesomeIcon>
+          </TouchableOpacity>
+          <CallComponent
+            navigation={navigation}
+            route={route}
+            name={name}
+            phone={phone}
+            uri={uri}
+            id={id}
+            count={count}
+            recent_call={recent_call}
+          />
+        </View>
+      ) : (
+        <Text></Text>
+      )}
       <FlashMessage position="bottom"></FlashMessage>
     </View>
   );
@@ -283,7 +318,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     margin: 10,
   },
-  phoneTextContainer:{
-    marginLeft:20,
+  phoneTextContainer: {
+    marginLeft: 20,
+  },
+  buttonComponent:{
+    borderRadius:8,
+    backgroundColor:"blue",
+    height:30,
   }
 });

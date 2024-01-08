@@ -48,29 +48,23 @@ export default function Contacts(props) {
     }, [])
   );
 
-  /*if (contacts_list) {
-        console.log("data is", contacts_list);
-    }*/
 
   const AddNewUser = () => {
-    navigation.navigate("Create_contact", { isCreateUserInfo: true });
+    navigation.navigate("CreateContact", { isCreateUserInfo: true });
   };
   const EditUser = (item) => {
     console.log("Edit user function is called");
-    console.log("item which is clicked", item.name, item.uri, item.phone);
-    navigation.navigate("Create_contact", {
+    console.log("item which is clicked", item.name, item.uri, item.phone,item.recent_call,item.count);
+    navigation.navigate("CreateContact", {
       name: item.name,
       phone: item.phone,
       uri: item.uri,
       id: item.id,
+      recent_call:item.recent_call,
+      count:item.count,
       isEditUserInfo: true,
     });
   };
-
-  const handleSearch=()=>{
-    navigation.navigate("search");
-    console.log("handleSearch function called");
-  }
 
   const sortFunc = (list) => {
     list?.sort(function (a, b) {
